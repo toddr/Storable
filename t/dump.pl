@@ -1,16 +1,19 @@
-#
-#  Copyright (c) 1995-2000, Raphael Manfredi
-#  
-#  You may redistribute only under the same terms as Perl 5, as specified
-#  in the README file that comes with the distribution.
-#
+;# $Id: dump.pl,v 0.2 1997/01/13 10:53:37 ram Exp $
+;#
+;#  Copyright (c) 1995-1997, Raphael Manfredi
+;#  
+;#  You may redistribute only under the terms of the Artistic License,
+;#  as specified in the README file that comes with the distribution.
+;#
+;# $Log: dump.pl,v $
+;# Revision 0.2  1997/01/13  10:53:37  ram
+;# Baseline for second netwide alpha release.
+;#
 
 package dump;
-use Carp;
 
 %dump = (
 	'SCALAR'	=> 'dump_scalar',
-	'LVALUE'	=> 'dump_scalar',
 	'ARRAY'		=> 'dump_array',
 	'HASH'		=> 'dump_hash',
 	'REF'		=> 'dump_ref',
@@ -19,7 +22,7 @@ use Carp;
 # Given an object, dump its transitive data closure
 sub main'dump {
 	my ($object) = @_;
-	croak "Not a reference!" unless ref($object);
+	die "Not a reference!\n" unless ref($object);
 	local %dumped;
 	local %object;
 	local $count = 0;
@@ -31,7 +34,7 @@ sub main'dump {
 # This is the root recursive dumping routine that may indirectly be
 # called by one of the routine it calls...
 # The link parameter is set to false when the reference passed to
-# the routine is an internal temporary variable, implying the object's
+# the routine is an internal temporay variable, implying the object's
 # address is not to be dumped in the %dumped table since it's not a
 # user-visible object.
 sub recursive_dump {
@@ -60,19 +63,16 @@ sub recursive_dump {
 		return;
 	}
 
-	my $objcount = $count++;
-	$object{$addr} = $objcount;
-
 	# Call the appropriate dumping routine based on the reference type.
 	# If the referenced was blessed, we bless it once the object is dumped.
 	# The retrieval code will perform the same on the last object retrieved.
 
-	croak "Unknown simple type '$ref'" unless defined $dump{$ref};
-
+	die "Unknown simple type '$ref'\n" unless defined $dump{$ref};
 	&{$dump{$ref}}($object);	# Dump object
 	&bless($bless) if $bless;	# Mark it as blessed, if necessary
 
-	$dumped .= "OBJECT $objcount\n";
+	$dumped .= "OBJECT $count\n";
+	$object{$addr} = $count++;
 }
 
 # Indicate that current object is blessed

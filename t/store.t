@@ -1,48 +1,48 @@
 #!./perl
+
+# $Id: store.t,v 0.2 1997/01/13 10:53:38 ram Exp $
 #
-#  Copyright (c) 1995-2000, Raphael Manfredi
+#  Copyright (c) 1995-1997, Raphael Manfredi
 #  
-#  You may redistribute only under the same terms as Perl 5, as specified
-#  in the README file that comes with the distribution.
+#  You may redistribute only under the terms of the Artistic License,
+#  as specified in the README file that comes with the distribution.
+#
+# $Log: store.t,v $
+# Revision 0.2  1997/01/13  10:53:38  ram
+# Baseline for second netwide alpha release.
 #
 
-sub BEGIN {
-    unshift @INC, 't';
-    unshift @INC, 't/compat' if $] < 5.006002;
-    require Config; import Config;
-    if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
-        print "1..0 # Skip: Storable was not built\n";
-        exit 0;
-    }
-    require 'st-dump.pl';
-}
+chdir 't' if -d 't';
+require './dump.pl';
 
-use Storable qw(store retrieve store_fd nstore_fd fd_retrieve);
+use Storable qw(store retrieve store_fd nstore_fd retrieve_fd);
 
-use Test::More tests => 21;
+print "1..20\n";
 
 $a = 'toto';
 $b = \$a;
 $c = bless {}, CLASS;
 $c->{attribute} = 'attrval';
 %a = ('key', 'value', 1, 0, $a, $b, 'cvar', \$c);
-@a = ('first', undef, 3, -4, -3.14159, 456, 4.5,
-	$b, \$a, $a, $c, \$c, \%a);
+@a = ('first', undef, 3, 456, 4.5, $b, \$a, $a, $c, \$c, \%a);
 
-isnt(store(\@a, 'store'), undef);
+print "not " unless defined store(\@a, 'store');
+print "ok 1\n";
 
 $dumped = &dump(\@a);
-isnt($dumped, undef);
+print "ok 2\n";
 
 $root = retrieve('store');
-isnt($root, undef);
+print "not " unless defined $root;
+print "ok 3\n";
 
 $got = &dump($root);
-isnt($got, undef);
+print "ok 4\n";
 
-is($got, $dumped);
+print "not " unless $got eq $dumped; 
+print "ok 5\n";
 
-1 while unlink 'store';
+unlink 'store';
 
 package FOO; @ISA = qw(Storable);
 
@@ -55,37 +55,52 @@ sub make {
 package main;
 
 $foo = FOO->make;
-isnt($foo->store('store'), undef);
+print "not " unless $foo->store('store');
+print "ok 6\n";
 
-isnt(open(OUT, '>>store'), undef);
-binmode OUT;
+print "not " unless open(OUT, '>>store');
+print "ok 7\n";
 
-isnt(store_fd(\@a, ::OUT), undef);
-isnt(nstore_fd($foo, ::OUT), undef);
-isnt(nstore_fd(\%a, ::OUT), undef);
+print "not " unless defined store_fd(\@a, ::OUT);
+print "ok 8\n";
+print "not " unless defined nstore_fd($foo, ::OUT);
+print "ok 9\n";
+print "not " unless defined nstore_fd(\%a, ::OUT);
+print "ok 10\n";
 
-isnt(close(OUT), undef);
+print "not " unless close(OUT);
+print "ok 11\n";
 
-isnt(open(OUT, 'store'), undef);
+print "not " unless open(OUT, 'store');
 
-$r = fd_retrieve(::OUT);
-isnt($r, undef);
-is(&dump($r), &dump($foo));
+$r = retrieve_fd(::OUT);
+print "not " unless defined $r;
+print "ok 12\n";
+print "not " unless &dump($foo) eq &dump($r);
+print "ok 13\n";
 
-$r = fd_retrieve(::OUT);
-isnt($r, undef);
-is(&dump($r), &dump(\@a));
+$r = retrieve_fd(::OUT);
+print "not " unless defined $r;
+print "ok 14\n";
+print "not " unless &dump(\@a) eq &dump($r);
+print "ok 15\n";
 
-$r = fd_retrieve(main::OUT);
-isnt($r, undef);
-is(&dump($r), &dump($foo));
+$r = retrieve_fd(main::OUT);
+print "not " unless defined $r;
+print "ok 16\n";
+print "not " unless &dump($foo) eq &dump($r);
+print "ok 17\n";
 
-$r = fd_retrieve(::OUT);
-isnt($r, undef);
-is(&dump($r), &dump(\%a));
+$r = retrieve_fd(::OUT);
+print "not " unless defined $r;
+print "ok 18\n";
+print "not " unless &dump(\%a) eq &dump($r);
+print "ok 19\n";
 
-eval { $r = fd_retrieve(::OUT); };
-isnt($@, '');
+eval { $r = retrieve_fd(::OUT); };
+print "not " unless $@;
+print "ok 20\n";
 
-close OUT or die "Could not close: $!";
-END { 1 while unlink 'store' }
+close OUT;
+unlink 'store';
+

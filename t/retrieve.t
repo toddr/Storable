@@ -1,57 +1,51 @@
 #!./perl
+
+# $Id: retrieve.t,v 0.2 1997/01/13 10:53:37 ram Exp $
 #
-#  Copyright (c) 1995-2000, Raphael Manfredi
+#  Copyright (c) 1995-1997, Raphael Manfredi
 #  
-#  You may redistribute only under the same terms as Perl 5, as specified
-#  in the README file that comes with the distribution.
+#  You may redistribute only under the terms of the Artistic License,
+#  as specified in the README file that comes with the distribution.
+#
+# $Log: retrieve.t,v $
+# Revision 0.2  1997/01/13  10:53:37  ram
+# Baseline for second netwide alpha release.
 #
 
-sub BEGIN {
-    unshift @INC, 't';
-    unshift @INC, 't/compat' if $] < 5.006002;
-    require Config; import Config;
-    if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
-        print "1..0 # Skip: Storable was not built\n";
-        exit 0;
-    }
-    require 'st-dump.pl';
-}
-
+chdir 't' if -d 't';
+require './dump.pl';
 
 use Storable qw(store retrieve nstore);
-use Test::More tests => 14;
+
+print "1..7\n";
 
 $a = 'toto';
 $b = \$a;
 $c = bless {}, CLASS;
 $c->{attribute} = 'attrval';
 %a = ('key', 'value', 1, 0, $a, $b, 'cvar', \$c);
-@a = ('first', '', undef, 3, -4, -3.14159, 456, 4.5,
-	$b, \$a, $a, $c, \$c, \%a);
+@a = ('first', undef, 3, 456, 4.5, $b, \$a, $a, $c, \$c, \%a);
 
-isnt(store(\@a, 'store'), undef);
-is(Storable::last_op_in_netorder(), '');
-isnt(nstore(\@a, 'nstore'), undef);
-is(Storable::last_op_in_netorder(), 1);
-is(Storable::last_op_in_netorder(), 1);
+print "not " unless defined store(\@a, 'store');
+print "ok 1\n";
+print "not " unless defined nstore(\@a, 'nstore');
+print "ok 2\n";
 
 $root = retrieve('store');
-isnt($root, undef);
-is(Storable::last_op_in_netorder(), '');
+print "not " unless defined $root;
+print "ok 3\n";
 
 $nroot = retrieve('nstore');
-isnt($root, undef);
-is(Storable::last_op_in_netorder(), 1);
+print "not " unless defined $nroot;
+print "ok 4\n";
 
 $d1 = &dump($root);
-isnt($d1, undef);
+print "ok 5\n";
 $d2 = &dump($nroot);
-isnt($d2, undef);
+print "ok 6\n";
 
-is($d1, $d2);
+print "not " unless $d1 eq $d2; 
+print "ok 7\n";
 
-# Make sure empty string is defined at retrieval time
-isnt($root->[1], undef);
-is(length $root->[1], 0);
+unlink 'store', 'nstore';
 
-END { 1 while unlink('store', 'nstore') }
