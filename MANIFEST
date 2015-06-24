@@ -1,14 +1,17 @@
-ChangeLog
+ChangeLog			Changes since baseline
 hints/gnukfreebsd.pl
 hints/gnuknetbsd.pl
 hints/hpux.pl
 hints/linux.pl
-Makefile.PL
-MANIFEST			This list of files
+Makefile.PL			Generic Makefile template
+MANIFEST			This shipping list
+META.yml
+patchlevel.h			Records current patchlevel
 ppport.h
-README
-Storable.pm
-Storable.xs
+README				Read this first
+Storable.pm			The perl side of Storable
+Storable.xs			The C side of Storable
+t/attach.t
 t/attach_errors.t
 t/attach_singleton.t
 t/blessed.t
@@ -24,6 +27,7 @@ t/croak.t
 t/dclone.t
 t/destroy.t
 t/downgrade.t
+t/dump.pl			Small utility to dump data structures
 t/file_magic.t
 t/forgive.t
 t/freeze.t
@@ -33,6 +37,7 @@ t/HAS_OVERLOAD.pm
 t/integer.t
 t/interwork56.t
 t/just_plain_nasty.t
+t/leaks.t
 t/lock.t
 t/make_56_interwork.pl
 t/make_downgrade.pl
@@ -41,17 +46,17 @@ t/malice.t
 t/overload.t
 t/recurse.t
 t/restrict.t
-t/retrieve.t
+t/retrieve.t			Test retrieve operation
 t/robust.t
 t/sig_die.t
 t/st-dump.pl
-t/store.t
+t/store.t			Test store operation
 t/testlib.pl
 t/threads.t
 t/tied.t
 t/tied_hook.t
 t/tied_items.t
+t/tied_store.t
 t/utf8.t
 t/utf8hash.t
 t/weak.t
-META.yml                                 Module meta-data (added by MakeMaker)
