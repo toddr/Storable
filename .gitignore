@@ -1,0 +1,8 @@
+/MYMETA.json
+/MYMETA.yml
+/Makefile
+/MANIFEST.bak
+/Storable.c
+/Storable.o
+/blib/*
+/pm_to_blib
